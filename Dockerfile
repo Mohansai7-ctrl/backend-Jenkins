@@ -14,4 +14,5 @@ RUN addgroup -S expense && adduser -S expense -G expense && \
 WORKDIR /opt/server
 COPY --from=build /opt/server /opt/server
 USER expense
-CMD ["node", "index.js"]
+CMD ["node", "index.js"] 
+# Above will start the index.js application with node build tool
