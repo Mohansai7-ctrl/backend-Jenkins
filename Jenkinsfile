@@ -1,4 +1,5 @@
 pipeline {
+
     agent {
         label 'AGENT-1'
     }
@@ -41,19 +42,31 @@ pipeline {
         }
 
         stage("Building the docker Image") {
+            steps {
+                sh """
+                docker build -t mohansai7/backend:${appVersion} .
+                docker images
+                """
 
-            sh """
-            docker build -t mohansai7/backend:${appVersion} .
-            docker images
-            """
+            }
+
+            
         }
 
         stage("pushing the image into ECR") {
-            echo "This built image to be pushed to AWS ECR"
+            steps {
+                echo "This built image to be pushed to AWS ECR"
+
+            }
+            
         }
 
         stage ("Deploying via EKS") {
-            echo "This needs to be deployed via Kubernetes EKS"
+            steps {
+                echo "This needs to be deployed via Kubernetes EKS"
+
+            }
+            
         }
 
     }
