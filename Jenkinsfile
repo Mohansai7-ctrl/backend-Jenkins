@@ -75,7 +75,7 @@ pipeline {
 
         always {
             echo "This prints always irrespective of above stage section success or failes"
-            deleteDir()
+            //deleteDir()
         }
 
         success {
