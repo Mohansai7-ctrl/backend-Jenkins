@@ -48,6 +48,14 @@ pipeline {
             """
         }
 
+        stage("pushing the image into ECR") {
+            echo "This built image to be pushed to AWS ECR"
+        }
+
+        stage ("Deploying via EKS") {
+            echo "This needs to be deployed via Kubernetes EKS"
+        }
+
     }
 
     post {
