@@ -1,0 +1,11 @@
+#Here, db_host Will get from RDS Endpoint which is created by 30-rds by expense-infra-jenkins-dev
+# and imageURL can get from ECR which is created by 70-ecr in expense-infra-jenkins-dev
+
+
+deployment:
+  imageURL: 022499022353.dkr.ecr.us-east-1.amazonaws.com/expense/dev/backend
+  imageVersion: IMAGE_VERSION  #This value will get from deploy stage in Jnekinsfile
+configMap:
+  db_host:   # RDS Endpoint
+hpa:
+  cpuUtilization: 20

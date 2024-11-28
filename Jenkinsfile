@@ -1,3 +1,4 @@
+// Once 70-ecr, images are created in ecr repository, then we need to login into ecr repo, build and push the image into ecr, we will get these commands in ECR under created image name, we need to provide these details in Deploy stage here.
 pipeline {
 
     agent {
@@ -10,8 +11,13 @@ pipeline {
     }
 
     environment {
-        DEBUG = 'true'
+        //DEBUG = 'true'
         appVersion = '' //its global can be used for any stage and for any section
+        region = 'us-east-1'  //all these for Deploy stage into ECR
+        account_id = '022499022353'
+        project = 'expense'
+        environment = 'dev'
+        component = 'backend'
         }
 
     stages {
@@ -22,7 +28,7 @@ pipeline {
 
                 script {
 
-                    def packageJson = readJSON file: 'package.json'  //this will read the entire package.json into packageJson variable as defined here.
+                    def packageJson = readJSON file: 'package.json'  //this will read the entire package.json into packageJson variable as defined here. To read the version we installed Pipeline Utility Steps Plugin.
                     appVersion = packageJson.version // so the version in package.json will get into appVersion
                     echo "App version: ${appVersion}"
 
@@ -41,33 +47,45 @@ pipeline {
 
         }
 
-        stage("Building the docker Image") {
+        stage("Building the docker Image and Pushing into ECR") {  //Here we need to push to ECR which is a aws service, we shouldnt push to dockerhub(our public repositories)
             steps {
-                sh """
-                docker build -t mohansai7/backend:${appVersion} .
-                docker images
-                """
+                withAWS(region: 'us-east-1', credentials: 'aws-creds') {
+                    sh """
+                    aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.us-east-1.amazonaws.com
 
+                    docker build -t ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${appVersion} .
+
+                    docker images
+
+                    docker push ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${appVersion}
+                        
+                    """
+
+                }
+
+                
             }
 
             
         }
 
-        stage("pushing the image into ECR") {
-            steps {
-                echo "This built image to be pushed to AWS ECR"
+        stage("Deploy") {
 
+            steps {
+                withAWS(region: 'us-east-1', credentials: 'aws-creds') {
+                    sh """
+                    aws eks update-kubeconfig --region ${region} --name ${project}-${environment}
+                    cd helm
+                    sed -i 's/IMAGE_VERSION/${appVersion}/g' values-${environment}.yaml
+                    helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml . 
+                    """
+
+                }
             }
+            
             
         }
 
-        stage ("Deploying via EKS") {
-            steps {
-                echo "This needs to be deployed via Kubernetes EKS"
-
-            }
-            
-        }
 
     }
 
