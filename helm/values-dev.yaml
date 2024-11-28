@@ -6,6 +6,6 @@ deployment:
   imageURL: 022499022353.dkr.ecr.us-east-1.amazonaws.com/expense/dev/backend
   imageVersion: IMAGE_VERSION  #This value will get from deploy stage in Jnekinsfile
 configMap:
-  db_host:   # RDS Endpoint
+  db_host: expense.chqoiyceaheh.us-east-1.rds.amazonaws.com   # RDS Endpoint
 hpa:
   cpuUtilization: 20
