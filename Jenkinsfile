@@ -47,6 +47,30 @@ pipeline {
 
         }
 
+        stage('SonarQube Analysis') {
+
+            environment {
+                SCANNER_HOME = tool 'sonar-6.0' //sonar scanner configuration
+
+            }
+            steps {
+                //sonar server injection
+                withSonarQubeEnv('sonar-6.0') {
+                    sh '$SCANNER_HOME/bin/sonar-scanner'
+                    // Here, we used general scanner, it automatically checks depends on language used for application configuration and provides test results upon scanning and testing.
+                }
+            }
+        }
+
+        stage('SQuality Gate') {   //If SonarQube Quality Gate Failed, then Pipeline also gets aborted
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+                
+            }
+        }
+
         stage("Building the docker Image and Pushing into ECR") {  //Here we need to push to ECR which is a aws service, we shouldnt push to dockerhub(our public repositories)
             steps {
                 withAWS(region: 'us-east-1', credentials: 'aws-creds') {
