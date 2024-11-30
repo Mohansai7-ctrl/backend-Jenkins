@@ -1,3 +1,3 @@
 # SonarQube Structure
 
-![alt text](sonarqube.svg)
+![alt text](sonarqube.drawio.svg)
